@@ -31,8 +31,8 @@ describe('EmployeeForm', () => {
     ).toBeInTheDocument()
 
     expect(
-      screen.getByPlaceholderText('Enter country')
-    ).toBeInTheDocument()
+  screen.getByRole('combobox', { name: /country/i })
+).toBeInTheDocument()
 
     expect(
       screen.getByPlaceholderText('Enter state')

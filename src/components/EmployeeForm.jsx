@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 
 function EmployeeForm({
   employee,
+  countries,
+  countryLoading,
   onSubmit,
   onCancel,
 }) {
@@ -238,29 +240,39 @@ function EmployeeForm({
             </div>
 
             {/* Country */}
-            <div className="col-md-6 mb-3">
-              <label className="form-label">
-                Country <span className="text-danger">*</span>
-              </label>
+           <div className="col-md-6 mb-3">
+  <label htmlFor="country" className="form-label">
+  Country <span className="text-danger">*</span>
+</label>
 
-              <input
-                type="text"
-                name="country"
-                className={`form-control ${
-                  errors.country ? 'is-invalid' : ''
-                }`}
-                value={formData.country}
-                onChange={handleChange}
-                placeholder="Enter country"
-              />
+  <select
+  id="country"
+  name="country"
+    className={`form-select ${
+      errors.country ? 'is-invalid' : ''
+    }`}
+    value={formData.country}
+    onChange={handleChange}
+  >
+    <option value="">
+      {countryLoading
+        ? 'Loading countries...'
+        : 'Select country'}
+    </option>
 
-              {errors.country && (
-                <div className="invalid-feedback">
-                  {errors.country}
-                </div>
-              )}
-            </div>
+    {countries?.map((item) => (
+      <option key={item.id} value={item.country}>
+        {item.country}
+      </option>
+    ))}
+  </select>
 
+  {errors.country && (
+    <div className="invalid-feedback">
+      {errors.country}
+    </div>
+  )}
+</div>
             {/* State */}
             <div className="col-md-6 mb-3">
               <label className="form-label">

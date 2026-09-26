@@ -3,6 +3,9 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import {
   getEmployees,
   createEmployee,
+  updateEmployee as updateEmployeeApi,
+  deleteEmployee as deleteEmployeeApi,
+  getCountries,
 } from '../../api/employeeApi'
 
 
@@ -51,6 +54,28 @@ export const addEmployee = createAsyncThunk(
 
 
 // ===============================
+// GET ALL COUNTRIES
+// ===============================
+
+export const fetchCountries = createAsyncThunk(
+  'employees/fetchCountries',
+
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await getCountries()
+
+      return data
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+        'Failed to fetch countries'
+      )
+    }
+  }
+)
+
+
+// ===============================
 // UPDATE EMPLOYEE
 // ===============================
 
@@ -59,29 +84,14 @@ export const updateEmployee = createAsyncThunk(
 
   async ({ id, employee }, { rejectWithValue }) => {
     try {
-      const response = await fetch(
-        `https://669b3f09276e45187d34eb4e.mockapi.io/api/v1/employee/${id}`,
-        {
-          method: 'PUT',
-
-          headers: {
-            'Content-Type': 'application/json',
-          },
-
-          body: JSON.stringify(employee),
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error('Failed to update employee')
-      }
-
-      const data = await response.json()
+      const data = await updateEmployeeApi(id, employee)
 
       return data
-
     } catch (error) {
-      return rejectWithValue(error.message)
+      return rejectWithValue(
+        error.response?.data?.message ||
+        'Failed to update employee'
+      )
     }
   }
 )
@@ -96,21 +106,14 @@ export const deleteEmployee = createAsyncThunk(
 
   async (id, { rejectWithValue }) => {
     try {
-      const response = await fetch(
-        `https://669b3f09276e45187d34eb4e.mockapi.io/api/v1/employee/${id}`,
-        {
-          method: 'DELETE',
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error('Failed to delete employee')
-      }
+      await deleteEmployeeApi(id)
 
       return id
-
     } catch (error) {
-      return rejectWithValue(error.message)
+      return rejectWithValue(
+        error.response?.data?.message ||
+        'Failed to delete employee'
+      )
     }
   }
 )
@@ -122,8 +125,14 @@ export const deleteEmployee = createAsyncThunk(
 
 const initialState = {
   employees: [],
+  countries: [],
+
   loading: false,
   error: null,
+
+  countryLoading: false,
+  countryError: null,
+
   selectedEmployee: null,
 }
 
@@ -139,14 +148,17 @@ const employeeSlice = createSlice({
 
   reducers: {
 
+    // Clear employee error
     clearError: (state) => {
       state.error = null
     },
 
+    // Select employee
     setSelectedEmployee: (state, action) => {
       state.selectedEmployee = action.payload
     },
 
+    // Clear selected employee
     clearSelectedEmployee: (state) => {
       state.selectedEmployee = null
     },
@@ -162,9 +174,9 @@ const employeeSlice = createSlice({
 
     builder
 
-      // --------------------------------
+      // ==================================
       // FETCH EMPLOYEES
-      // --------------------------------
+      // ==================================
 
       .addCase(fetchEmployees.pending, (state) => {
         state.loading = true
@@ -182,9 +194,9 @@ const employeeSlice = createSlice({
       })
 
 
-      // --------------------------------
+      // ==================================
       // ADD EMPLOYEE
-      // --------------------------------
+      // ==================================
 
       .addCase(addEmployee.pending, (state) => {
         state.loading = true
@@ -193,7 +205,6 @@ const employeeSlice = createSlice({
 
       .addCase(addEmployee.fulfilled, (state, action) => {
         state.loading = false
-
         state.employees.push(action.payload)
       })
 
@@ -203,9 +214,29 @@ const employeeSlice = createSlice({
       })
 
 
-      // --------------------------------
+      // ==================================
+      // FETCH COUNTRIES
+      // ==================================
+
+      .addCase(fetchCountries.pending, (state) => {
+        state.countryLoading = true
+        state.countryError = null
+      })
+
+      .addCase(fetchCountries.fulfilled, (state, action) => {
+        state.countryLoading = false
+        state.countries = action.payload
+      })
+
+      .addCase(fetchCountries.rejected, (state, action) => {
+        state.countryLoading = false
+        state.countryError = action.payload
+      })
+
+
+      // ==================================
       // UPDATE EMPLOYEE
-      // --------------------------------
+      // ==================================
 
       .addCase(updateEmployee.pending, (state) => {
         state.loading = true
@@ -234,9 +265,9 @@ const employeeSlice = createSlice({
       })
 
 
-      // --------------------------------
+      // ==================================
       // DELETE EMPLOYEE
-      // --------------------------------
+      // ==================================
 
       .addCase(deleteEmployee.pending, (state) => {
         state.loading = true

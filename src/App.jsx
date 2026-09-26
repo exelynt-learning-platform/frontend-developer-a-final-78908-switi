@@ -3,11 +3,11 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import {
   fetchEmployees,
+  fetchCountries,
   addEmployee,
   updateEmployee,
   deleteEmployee,
 } from './features/employees/employeeSlice'
-
 import EmployeeTable from './components/EmployeeTable'
 import EmployeeSearch from './components/EmployeeSearch'
 import EmployeeForm from './components/EmployeeForm'
@@ -15,20 +15,24 @@ import EmployeeForm from './components/EmployeeForm'
 function App() {
   const dispatch = useDispatch()
 
-  const {
-    employees,
-    loading,
-    error,
-  } = useSelector((state) => state.employees)
+ const {
+  employees,
+  countries,
+  loading,
+  error,
+  countryLoading,
+  countryError,
+} = useSelector((state) => state.employees)
 
   const [searchResults, setSearchResults] = useState(null)
 
   // Employee being edited
   const [editingEmployee, setEditingEmployee] = useState(null)
 
-  useEffect(() => {
-    dispatch(fetchEmployees())
-  }, [dispatch])
+ useEffect(() => {
+  dispatch(fetchEmployees())
+  dispatch(fetchCountries())
+}, [dispatch])
 
   // SEARCH
   const handleSearch = (searchId) => {
@@ -107,9 +111,11 @@ function App() {
       {/* ADD / EDIT FORM */}
 
       <EmployeeForm
-        employee={editingEmployee}
-        onSubmit={handleSubmitEmployee}
-        onCancel={handleCancelEdit}
+         employee={editingEmployee}
+         countries={countries}
+         countryLoading={countryLoading}
+         onSubmit={handleSubmitEmployee}
+         onCancel={handleCancelEdit}
       />
 
       {/* SEARCH */}
@@ -136,6 +142,12 @@ function App() {
         </div>
       )}
 
+      {countryError && (
+  <div className="alert alert-danger">
+    {countryError}
+  </div>
+)}
+
       {/* SEARCH NOT FOUND */}
 
       {!loading &&
@@ -158,6 +170,15 @@ function App() {
             onDelete={handleDelete}
           />
         )}
+
+        {!loading &&
+  !error &&
+  employeesToDisplay.length === 0 &&
+  searchResults === null && (
+    <div className="alert alert-secondary text-center">
+      No employees available.
+    </div>
+  )}
 
     </div>
   )
