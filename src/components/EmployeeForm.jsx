@@ -77,7 +77,7 @@ function EmployeeForm({
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailId)
     ) {
       newErrors.emailId = 'Enter a valid email address'
-    } else if (formData.emailId.length > 100) {
+    } else if (formData.emailId.trim().length > 100) {
       newErrors.emailId = 'Email must not exceed 100 characters'
     }
 
