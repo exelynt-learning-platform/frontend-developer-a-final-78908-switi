@@ -16,6 +16,9 @@ describe('employeeSlice', () => {
     countryLoading: false,
     countryError: null,
     selectedEmployee: null,
+    searchResults: [],
+    searchLoading: false,
+    searchError: null,
   }
 
   it('returns the initial state', () => {

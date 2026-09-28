@@ -1,4 +1,4 @@
-function EmployeeTable({ employees,onEdit,onDelete }) {
+function EmployeeTable({ employees, onEdit, onDelete }) {
   return (
     <div className="table-responsive">
       <table className="table table-bordered table-striped">
@@ -9,6 +9,7 @@ function EmployeeTable({ employees,onEdit,onDelete }) {
             <th>Email</th>
             <th>Mobile</th>
             <th>Country</th>
+            <th>Actions</th>
           </tr>
         </thead>
 
@@ -20,7 +21,8 @@ function EmployeeTable({ employees,onEdit,onDelete }) {
               <td>{employee.email || employee.emailId || ''}</td>
               <td>{employee.mobile}</td>
               <td>{employee.country}</td>
-              <td> 
+
+              <td>
                 <button
                   className="btn btn-warning btn-sm me-2"
                   onClick={() => onEdit(employee)}
