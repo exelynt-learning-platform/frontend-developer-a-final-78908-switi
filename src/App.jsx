@@ -3,52 +3,78 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import {
   fetchEmployees,
+  fetchEmployeeById,
   fetchCountries,
   addEmployee,
   updateEmployee,
   deleteEmployee,
+  clearSearchResults,
 } from './features/employees/employeeSlice'
+
 import EmployeeTable from './components/EmployeeTable'
 import EmployeeSearch from './components/EmployeeSearch'
 import EmployeeForm from './components/EmployeeForm'
 
+
 function App() {
   const dispatch = useDispatch()
 
- const {
-  employees,
-  countries,
-  loading,
-  error,
-  countryLoading,
-  countryError,
-} = useSelector((state) => state.employees)
+  const {
+    employees,
+    countries,
+    loading,
+    error,
+    countryLoading,
+    countryError,
+    searchResults,
+    searchLoading,
+    searchError,
+  } = useSelector((state) => state.employees)
 
-  const [searchResults, setSearchResults] = useState(null)
 
   // Employee being edited
   const [editingEmployee, setEditingEmployee] = useState(null)
 
- useEffect(() => {
-  dispatch(fetchEmployees())
-  dispatch(fetchCountries())
-}, [dispatch])
 
-  // SEARCH
+  // ===============================
+  // LOAD EMPLOYEES & COUNTRIES
+  // ===============================
+
+  useEffect(() => {
+    dispatch(fetchEmployees())
+    dispatch(fetchCountries())
+  }, [dispatch])
+
+
+  // ===============================
+  // SEARCH BY EMPLOYEE ID
+  // ===============================
+
   const handleSearch = (searchId) => {
-    const result = employees.filter(
-      (employee) =>
-        String(employee.id) === String(searchId)
-    )
+    const id = String(searchId).trim()
 
-    setSearchResults(result)
+    if (!id) {
+      dispatch(clearSearchResults())
+      return
+    }
+
+    dispatch(fetchEmployeeById(id))
   }
+
+
+  // ===============================
+  // CLEAR SEARCH
+  // ===============================
 
   const handleClear = () => {
-    setSearchResults(null)
+    dispatch(clearSearchResults())
   }
 
-  // ADD / UPDATE
+
+  // ===============================
+  // ADD / UPDATE EMPLOYEE
+  // ===============================
+
   const handleSubmitEmployee = (employee) => {
 
     // UPDATE
@@ -69,7 +95,11 @@ function App() {
     }
   }
 
-  // EDIT
+
+  // ===============================
+  // EDIT EMPLOYEE
+  // ===============================
+
   const handleEdit = (employee) => {
     setEditingEmployee(employee)
 
@@ -79,7 +109,11 @@ function App() {
     })
   }
 
-  // DELETE
+
+  // ===============================
+  // DELETE EMPLOYEE
+  // ===============================
+
   const handleDelete = (employee) => {
 
     const confirmed = window.confirm(
@@ -91,15 +125,34 @@ function App() {
     }
   }
 
+
+  // ===============================
   // CANCEL EDIT
+  // ===============================
+
   const handleCancelEdit = () => {
     setEditingEmployee(null)
   }
 
+
+  // ===============================
+  // EMPLOYEES TO DISPLAY
+  // ===============================
+
+  const isSearching =
+    searchResults.length > 0 ||
+    searchLoading ||
+    searchError
+
   const employeesToDisplay =
-    searchResults !== null
+    isSearching
       ? searchResults
       : employees
+
+
+  // ===============================
+  // UI
+  // ===============================
 
   return (
     <div className="container mt-5">
@@ -108,17 +161,23 @@ function App() {
         Employee Management Application
       </h1>
 
-      {/* ADD / EDIT FORM */}
+
+      {/* ===============================
+          ADD / EDIT FORM
+      =============================== */}
 
       <EmployeeForm
-         employee={editingEmployee}
-         countries={countries}
-         countryLoading={countryLoading}
-         onSubmit={handleSubmitEmployee}
-         onCancel={handleCancelEdit}
+        employee={editingEmployee}
+        countries={countries}
+        countryLoading={countryLoading}
+        onSubmit={handleSubmitEmployee}
+        onCancel={handleCancelEdit}
       />
 
-      {/* SEARCH */}
+
+      {/* ===============================
+          SEARCH
+      =============================== */}
 
       <EmployeeSearch
         employees={employees}
@@ -126,7 +185,10 @@ function App() {
         onClear={handleClear}
       />
 
-      {/* LOADING */}
+
+      {/* ===============================
+          MAIN LOADING
+      =============================== */}
 
       {loading && (
         <div className="alert alert-info">
@@ -134,7 +196,21 @@ function App() {
         </div>
       )}
 
-      {/* ERROR */}
+
+      {/* ===============================
+          SEARCH LOADING
+      =============================== */}
+
+      {searchLoading && (
+        <div className="alert alert-info">
+          Searching employee...
+        </div>
+      )}
+
+
+      {/* ===============================
+          MAIN ERROR
+      =============================== */}
 
       {error && (
         <div className="alert alert-danger">
@@ -142,46 +218,80 @@ function App() {
         </div>
       )}
 
+
+      {/* ===============================
+          COUNTRY ERROR
+      =============================== */}
+
       {countryError && (
-  <div className="alert alert-danger">
-    {countryError}
-  </div>
-)}
+        <div className="alert alert-danger">
+          {countryError}
+        </div>
+      )}
 
-      {/* SEARCH NOT FOUND */}
 
-      {!loading &&
-        !error &&
-        searchResults !== null &&
-        searchResults.length === 0 && (
-          <div className="alert alert-warning">
-            No employee found with this ID.
-          </div>
-        )}
+      {/* ===============================
+          SEARCH ERROR / NOT FOUND
+      =============================== */}
 
-      {/* EMPLOYEE TABLE */}
+      {searchError && !searchLoading && (
+        <div className="alert alert-warning">
+          No employee found with this ID.
+        </div>
+      )}
 
-      {!loading &&
-        !error &&
-        employeesToDisplay.length > 0 && (
+
+      {/* ===============================
+          SEARCH RESULT
+      =============================== */}
+
+      {!searchLoading &&
+        !searchError &&
+        searchResults.length > 0 && (
           <EmployeeTable
-            employees={employeesToDisplay}
+            employees={searchResults}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
         )}
 
-        {!loading &&
-  !error &&
-  employeesToDisplay.length === 0 &&
-  searchResults === null && (
-    <div className="alert alert-secondary text-center">
-      No employees available.
-    </div>
-  )}
+
+      {/* ===============================
+          NORMAL EMPLOYEE TABLE
+      =============================== */}
+
+      {!searchLoading &&
+        !searchError &&
+        searchResults.length === 0 &&
+        !isSearching &&
+        !loading &&
+        !error &&
+        employees.length > 0 && (
+          <EmployeeTable
+            employees={employees}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )}
+
+
+      {/* ===============================
+          EMPTY EMPLOYEE LIST
+      =============================== */}
+
+      {!loading &&
+        !searchLoading &&
+        !error &&
+        !searchError &&
+        employees.length === 0 && (
+          <div className="alert alert-secondary text-center">
+            No employees available.
+          </div>
+        )}
 
     </div>
   )
 }
+
 
 export default App

@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 
 import {
   getEmployees,
+  getEmployeeById,
   createEmployee,
   updateEmployee as updateEmployeeApi,
   deleteEmployee as deleteEmployeeApi,
@@ -25,6 +26,28 @@ export const fetchEmployees = createAsyncThunk(
       return rejectWithValue(
         error.response?.data?.message ||
         'Failed to fetch employees'
+      )
+    }
+  }
+)
+
+
+// ===============================
+// GET EMPLOYEE BY ID
+// ===============================
+
+export const fetchEmployeeById = createAsyncThunk(
+  'employees/fetchEmployeeById',
+
+  async (id, { rejectWithValue }) => {
+    try {
+      const data = await getEmployeeById(id)
+
+      return data
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+        'Employee not found'
       )
     }
   }
@@ -134,6 +157,10 @@ const initialState = {
   countryError: null,
 
   selectedEmployee: null,
+
+  searchResults: [],
+  searchLoading: false,
+  searchError: null,
 }
 
 
@@ -161,6 +188,12 @@ const employeeSlice = createSlice({
     // Clear selected employee
     clearSelectedEmployee: (state) => {
       state.selectedEmployee = null
+    },
+
+    // Clear search results
+    clearSearchResults: (state) => {
+      state.searchResults = []
+      state.searchError = null
     },
 
   },
@@ -195,6 +228,28 @@ const employeeSlice = createSlice({
 
 
       // ==================================
+      // FETCH EMPLOYEE BY ID
+      // ==================================
+
+      .addCase(fetchEmployeeById.pending, (state) => {
+        state.searchLoading = true
+        state.searchError = null
+        state.searchResults = []
+      })
+
+      .addCase(fetchEmployeeById.fulfilled, (state, action) => {
+        state.searchLoading = false
+        state.searchResults = [action.payload]
+      })
+
+      .addCase(fetchEmployeeById.rejected, (state, action) => {
+        state.searchLoading = false
+        state.searchError = action.payload
+        state.searchResults = []
+      })
+
+
+      // ==================================
       // ADD EMPLOYEE
       // ==================================
 
@@ -206,6 +261,10 @@ const employeeSlice = createSlice({
       .addCase(addEmployee.fulfilled, (state, action) => {
         state.loading = false
         state.employees.push(action.payload)
+
+        // Clear old search results after adding
+        state.searchResults = []
+        state.searchError = null
       })
 
       .addCase(addEmployee.rejected, (state, action) => {
@@ -257,6 +316,10 @@ const employeeSlice = createSlice({
         if (index !== -1) {
           state.employees[index] = updatedEmployee
         }
+
+        // Clear old search results after update
+        state.searchResults = []
+        state.searchError = null
       })
 
       .addCase(updateEmployee.rejected, (state, action) => {
@@ -282,6 +345,10 @@ const employeeSlice = createSlice({
             String(employee.id) !==
             String(action.payload)
         )
+
+        // Clear old search results after delete
+        state.searchResults = []
+        state.searchError = null
       })
 
       .addCase(deleteEmployee.rejected, (state, action) => {
@@ -301,6 +368,7 @@ export const {
   clearError,
   setSelectedEmployee,
   clearSelectedEmployee,
+  clearSearchResults,
 } = employeeSlice.actions
 
 
