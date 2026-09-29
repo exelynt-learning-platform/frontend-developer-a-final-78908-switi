@@ -10,22 +10,27 @@ import {
 } from '../../api/employeeApi'
 
 
+const handleThunkError = (error, fallbackMessage, rejectWithValue) => {
+  return rejectWithValue(
+    error.response?.data?.message || fallbackMessage
+  )
+}
+
+
 // ===============================
 // GET ALL EMPLOYEES
 // ===============================
 
 export const fetchEmployees = createAsyncThunk(
   'employees/fetchEmployees',
-
   async (_, { rejectWithValue }) => {
     try {
-      const data = await getEmployees()
-
-      return data
+      return await getEmployees()
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        'Failed to fetch employees'
+      return handleThunkError(
+        error,
+        'Failed to fetch employees',
+        rejectWithValue
       )
     }
   }
@@ -41,14 +46,14 @@ export const fetchEmployeeById = createAsyncThunk(
 
   async (id, { rejectWithValue }) => {
     try {
-      const data = await getEmployeeById(id)
+  return await getEmployeeById(id)
+} catch (error) {
+  return handleThunkError(
+    error,
+    'Employee not found',
+    rejectWithValue
+  )
 
-      return data
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        'Employee not found'
-      )
     }
   }
 )
@@ -62,16 +67,15 @@ export const addEmployee = createAsyncThunk(
   'employees/addEmployee',
 
   async (employee, { rejectWithValue }) => {
-    try {
-      const data = await createEmployee(employee)
-
-      return data
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        'Failed to add employee'
-      )
-    }
+   try {
+  return await createEmployee(employee)
+} catch (error) {
+  return handleThunkError(
+    error,
+    'Failed to add employee',
+    rejectWithValue
+  )
+}
   }
 )
 
@@ -85,15 +89,14 @@ export const fetchCountries = createAsyncThunk(
 
   async (_, { rejectWithValue }) => {
     try {
-      const data = await getCountries()
-
-      return data
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        'Failed to fetch countries'
-      )
-    }
+  return await getCountries()
+} catch (error) {
+  return handleThunkError(
+    error,
+    'Failed to fetch countries',
+    rejectWithValue
+  )
+}
   }
 )
 
@@ -107,15 +110,14 @@ export const updateEmployee = createAsyncThunk(
 
   async ({ id, employee }, { rejectWithValue }) => {
     try {
-      const data = await updateEmployeeApi(id, employee)
-
-      return data
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        'Failed to update employee'
-      )
-    }
+  return await updateEmployeeApi(id, employee)
+} catch (error) {
+  return handleThunkError(
+    error,
+    'Failed to update employee',
+    rejectWithValue
+  )
+}
   }
 )
 
@@ -129,15 +131,16 @@ export const deleteEmployee = createAsyncThunk(
 
   async (id, { rejectWithValue }) => {
     try {
-      await deleteEmployeeApi(id)
+  await deleteEmployeeApi(id)
 
-      return id
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        'Failed to delete employee'
-      )
-    }
+  return id
+} catch (error) {
+  return handleThunkError(
+    error,
+    'Failed to delete employee',
+    rejectWithValue
+  )
+}
   }
 )
 

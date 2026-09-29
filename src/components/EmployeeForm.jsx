@@ -1,4 +1,14 @@
+
 import { useEffect, useState } from 'react'
+
+const EMPTY_FORM = {
+  name: '',
+  emailId: '',
+  mobile: '',
+  country: '',
+  state: '',
+  district: '',
+}
 
 function EmployeeForm({
   employee,
@@ -7,18 +17,9 @@ function EmployeeForm({
   onSubmit,
   onCancel,
 }) {
-  const [formData, setFormData] = useState({
-    name: '',
-    emailId: '',
-    mobile: '',
-    country: '',
-    state: '',
-    district: '',
-  })
-
+  const [formData, setFormData] = useState({ ...EMPTY_FORM })
   const [errors, setErrors] = useState({})
 
-  // When editing, fill the form with existing employee data
   useEffect(() => {
     if (employee) {
       setFormData({
@@ -30,20 +31,12 @@ function EmployeeForm({
         district: employee.district || '',
       })
     } else {
-      setFormData({
-        name: '',
-        emailId: '',
-        mobile: '',
-        country: '',
-        state: '',
-        district: '',
-      })
+      setFormData({ ...EMPTY_FORM })
     }
 
     setErrors({})
   }, [employee])
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target
 
@@ -52,25 +45,21 @@ function EmployeeForm({
       [name]: value,
     })
 
-    // Remove error when user starts typing
     setErrors({
       ...errors,
       [name]: '',
     })
   }
 
-  // Validate form
   const validateForm = () => {
     const newErrors = {}
 
-    // Name validation
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required'
     } else if (formData.name.length > 50) {
       newErrors.name = 'Name must not exceed 50 characters'
     }
 
-    // Email validation
     if (!formData.emailId.trim()) {
       newErrors.emailId = 'Email is required'
     } else if (
@@ -81,24 +70,20 @@ function EmployeeForm({
       newErrors.emailId = 'Email must not exceed 100 characters'
     }
 
-    // Mobile validation
     if (!formData.mobile.trim()) {
       newErrors.mobile = 'Mobile number is required'
     } else if (!/^[0-9]{10}$/.test(formData.mobile)) {
       newErrors.mobile = 'Mobile number must contain 10 digits'
     }
 
-    // Country validation
     if (!formData.country.trim()) {
       newErrors.country = 'Country is required'
     }
 
-    // State validation
     if (!formData.state.trim()) {
       newErrors.state = 'State is required'
     }
 
-    // District validation
     if (!formData.district.trim()) {
       newErrors.district = 'District is required'
     }
@@ -108,7 +93,6 @@ function EmployeeForm({
     return Object.keys(newErrors).length === 0
   }
 
-  // Submit form
   const handleSubmit = (e) => {
     e.preventDefault()
 
@@ -118,40 +102,21 @@ function EmployeeForm({
 
     onSubmit(formData)
 
-    // Clear form only when adding
     if (!employee) {
-      setFormData({
-        name: '',
-        emailId: '',
-        mobile: '',
-        country: '',
-        state: '',
-        district: '',
-      })
+      setFormData({ ...EMPTY_FORM })
     }
 
     setErrors({})
   }
 
-  // Cancel edit
   const handleCancel = () => {
-    setFormData({
-      name: '',
-      emailId: '',
-      mobile: '',
-      country: '',
-      state: '',
-      district: '',
-    })
-
+    setFormData({ ...EMPTY_FORM })
     setErrors({})
-
     onCancel()
   }
 
   return (
     <div className="card shadow-sm mb-4">
-
       <div className="card-header bg-primary text-white">
         <h4 className="mb-0">
           {employee ? 'Edit Employee' : 'Add Employee'}
@@ -159,12 +124,9 @@ function EmployeeForm({
       </div>
 
       <div className="card-body">
-
         <form onSubmit={handleSubmit}>
-
           <div className="row">
 
-            {/* Name */}
             <div className="col-md-6 mb-3">
               <label className="form-label">
                 Name <span className="text-danger">*</span>
@@ -173,9 +135,7 @@ function EmployeeForm({
               <input
                 type="text"
                 name="name"
-                className={`form-control ${
-                  errors.name ? 'is-invalid' : ''
-                }`}
+                className={`form-control ${errors.name ? 'is-invalid' : ''}`}
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Enter employee name"
@@ -189,7 +149,6 @@ function EmployeeForm({
               )}
             </div>
 
-            {/* Email */}
             <div className="col-md-6 mb-3">
               <label className="form-label">
                 Email <span className="text-danger">*</span>
@@ -198,9 +157,7 @@ function EmployeeForm({
               <input
                 type="email"
                 name="emailId"
-                className={`form-control ${
-                  errors.emailId ? 'is-invalid' : ''
-                }`}
+                className={`form-control ${errors.emailId ? 'is-invalid' : ''}`}
                 value={formData.emailId}
                 onChange={handleChange}
                 placeholder="Enter email address"
@@ -214,7 +171,6 @@ function EmployeeForm({
               )}
             </div>
 
-            {/* Mobile */}
             <div className="col-md-6 mb-3">
               <label className="form-label">
                 Mobile <span className="text-danger">*</span>
@@ -223,9 +179,7 @@ function EmployeeForm({
               <input
                 type="text"
                 name="mobile"
-                className={`form-control ${
-                  errors.mobile ? 'is-invalid' : ''
-                }`}
+                className={`form-control ${errors.mobile ? 'is-invalid' : ''}`}
                 value={formData.mobile}
                 onChange={handleChange}
                 placeholder="Enter 10 digit mobile number"
@@ -239,41 +193,38 @@ function EmployeeForm({
               )}
             </div>
 
-            {/* Country */}
-           <div className="col-md-6 mb-3">
-  <label htmlFor="country" className="form-label">
-  Country <span className="text-danger">*</span>
-</label>
+            <div className="col-md-6 mb-3">
+              <label htmlFor="country" className="form-label">
+                Country <span className="text-danger">*</span>
+              </label>
 
-  <select
-  id="country"
-  name="country"
-    className={`form-select ${
-      errors.country ? 'is-invalid' : ''
-    }`}
-    value={formData.country}
-    onChange={handleChange}
-  >
-    <option value="">
-      {countryLoading
-        ? 'Loading countries...'
-        : 'Select country'}
-    </option>
+              <select
+                id="country"
+                name="country"
+                className={`form-select ${errors.country ? 'is-invalid' : ''}`}
+                value={formData.country}
+                onChange={handleChange}
+              >
+                <option value="">
+                  {countryLoading
+                    ? 'Loading countries...'
+                    : 'Select country'}
+                </option>
 
-    {countries?.map((item) => (
-      <option key={item.id} value={item.country}>
-        {item.country}
-      </option>
-    ))}
-  </select>
+                {countries?.map((item) => (
+                  <option key={item.id} value={item.country}>
+                    {item.country}
+                  </option>
+                ))}
+              </select>
 
-  {errors.country && (
-    <div className="invalid-feedback">
-      {errors.country}
-    </div>
-  )}
-</div>
-            {/* State */}
+              {errors.country && (
+                <div className="invalid-feedback">
+                  {errors.country}
+                </div>
+              )}
+            </div>
+
             <div className="col-md-6 mb-3">
               <label className="form-label">
                 State <span className="text-danger">*</span>
@@ -282,9 +233,7 @@ function EmployeeForm({
               <input
                 type="text"
                 name="state"
-                className={`form-control ${
-                  errors.state ? 'is-invalid' : ''
-                }`}
+                className={`form-control ${errors.state ? 'is-invalid' : ''}`}
                 value={formData.state}
                 onChange={handleChange}
                 placeholder="Enter state"
@@ -297,7 +246,6 @@ function EmployeeForm({
               )}
             </div>
 
-            {/* District */}
             <div className="col-md-6 mb-3">
               <label className="form-label">
                 District <span className="text-danger">*</span>
@@ -306,9 +254,7 @@ function EmployeeForm({
               <input
                 type="text"
                 name="district"
-                className={`form-control ${
-                  errors.district ? 'is-invalid' : ''
-                }`}
+                className={`form-control ${errors.district ? 'is-invalid' : ''}`}
                 value={formData.district}
                 onChange={handleChange}
                 placeholder="Enter district"
@@ -323,9 +269,7 @@ function EmployeeForm({
 
           </div>
 
-          {/* Buttons */}
           <div className="mt-3">
-
             <button
               type="submit"
               className="btn btn-success me-2"
@@ -342,14 +286,12 @@ function EmployeeForm({
                 Cancel
               </button>
             )}
-
           </div>
-
         </form>
-
       </div>
     </div>
   )
 }
 
-export default EmployeeForm
+export default EmployeeForm;
+

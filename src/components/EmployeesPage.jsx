@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -31,6 +32,7 @@ function EmployeesPage() {
   } = useSelector((state) => state.employees)
 
   const [editingEmployee, setEditingEmployee] = useState(null)
+  const [hasSearched, setHasSearched] = useState(false)
 
   useEffect(() => {
     dispatch(fetchEmployees())
@@ -41,31 +43,40 @@ function EmployeesPage() {
     const id = String(searchId).trim()
 
     if (!id) {
+      setHasSearched(false)
       dispatch(clearSearchResults())
       return
     }
 
+    setHasSearched(true)
     dispatch(fetchEmployeeById(id))
   }
 
   const handleClear = () => {
+    setHasSearched(false)
     dispatch(clearSearchResults())
   }
 
-  const handleSubmitEmployee = (employee) => {
-    if (editingEmployee) {
-      dispatch(
-        updateEmployee({
-          id: editingEmployee.id,
-          employee,
-        })
-      )
 
-      setEditingEmployee(null)
-    } else {
-      dispatch(addEmployee(employee))
-    }
+const handleSubmitEmployee = (employee) => {
+  setHasSearched(false)
+  dispatch(clearSearchResults())
+
+  if (editingEmployee) {
+    dispatch(
+      updateEmployee({
+        id: editingEmployee.id,
+        employee,
+      })
+    )
+
+    setEditingEmployee(null)
+  } else {
+    dispatch(addEmployee(employee))
   }
+}
+
+
 
   const handleEdit = (employee) => {
     setEditingEmployee(employee)
@@ -81,19 +92,43 @@ function EmployeesPage() {
       `Are you sure you want to delete ${employee.name}?`
     )
 
-    if (confirmed) {
-      dispatch(deleteEmployee(employee.id))
-    }
+  
+if (confirmed) {
+  setHasSearched(false)
+  dispatch(clearSearchResults())
+  dispatch(deleteEmployee(employee.id))
+}
+
+
   }
 
   const handleCancelEdit = () => {
     setEditingEmployee(null)
   }
 
-  const isSearching =
-    searchResults.length > 0 ||
-    searchLoading ||
-    searchError
+  const showSearchResults =
+    hasSearched &&
+    !searchLoading &&
+    !searchError &&
+    searchResults.length > 0
+
+  const showSearchEmpty =
+    hasSearched &&
+    !searchLoading &&
+    !searchError &&
+    searchResults.length === 0
+
+  const showFullTable =
+    !hasSearched &&
+    !loading &&
+    !error &&
+    employees.length > 0
+
+  const showEmptyState =
+    !hasSearched &&
+    !loading &&
+    !error &&
+    employees.length === 0
 
   return (
     <div className="container mt-5">
@@ -110,10 +145,9 @@ function EmployeesPage() {
       />
 
       <EmployeeSearch
-        employees={employees}
-        onSearch={handleSearch}
-        onClear={handleClear}
-      />
+  onSearch={handleSearch}
+  onClear={handleClear}
+/>
 
       {loading && (
         <div className="alert alert-info">
@@ -145,41 +179,36 @@ function EmployeesPage() {
         </div>
       )}
 
-      {!searchLoading &&
-        !searchError &&
-        searchResults.length > 0 && (
-          <EmployeeTable
-            employees={searchResults}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        )}
+      {showSearchEmpty && (
+        <div className="alert alert-warning">
+          No employee found with this ID.
+        </div>
+      )}
 
-      {!searchLoading &&
-        !searchError &&
-        searchResults.length === 0 &&
-        !isSearching &&
-        !loading &&
-        !error &&
-        employees.length > 0 && (
-          <EmployeeTable
-            employees={employees}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        )}
+      {showSearchResults && (
+        <EmployeeTable
+          employees={searchResults}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      )}
 
-      {!loading &&
-        !searchLoading &&
-        !error &&
-        !searchError &&
-        employees.length === 0 && (
-          <div className="alert alert-secondary text-center">
-            No employees available.
-          </div>
-        )}
+      {showFullTable && (
+        <EmployeeTable
+          employees={employees}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      )}
+
+      {showEmptyState && (
+        <div className="alert alert-secondary text-center">
+          No employees available.
+        </div>
+      )}
     </div>
   )
 }
 
-export default EmployeesPage
+export default EmployeesPage;
+

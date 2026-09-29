@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function EmployeeSearch({ employees, onSearch, onClear }) {
+function EmployeeSearch({ onSearch, onClear }) {
   const [searchId, setSearchId] = useState('')
 
   const handleSearch = () => {
